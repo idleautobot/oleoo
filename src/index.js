@@ -49,7 +49,7 @@ function deduce(property, name, multi = false) {
     }
 
     case 'season': {
-      const regex = /[\.\-]S(\d+)[\.\-]?(E(\d+))?([\.\-])/i
+      const regex = /[\.\-]S(\d+)[\.\-]?((?:-?E\d+)+)?([\.\-])/i
       const matches = name.match(regex)
 
       if (matches !== null) {
@@ -60,18 +60,25 @@ function deduce(property, name, multi = false) {
     }
 
     case 'episode': {
-      const regex = /[\.\-]S(\d+)[\.\-]?(E(\d+))([\.\-])/i
+      const regex = /[\.\-]S(\d+)[\.\-]?((?:-?E\d+)+)([\.\-])/i
       const matches = name.match(regex)
 
       if (matches !== null) {
-        result.match = parseInt(matches[3])
+        var episodes = matches[2].split(/-?E/i).slice(1).map(Number).sort((a, b) => a - b)
+        result.match = [episodes[0]]
+
+        var i = 0
+        while(result.match[i] < episodes[episodes.length - 1]) {
+          result.match.push(result.match[i] + 1)
+          i++
+        }
       }
 
       return result
     }
 
     case 'type': {
-      const regex = /[\.\-]S\d+[\.\-]?(E\d+)?([\.\-])/i
+      const regex = /[\.\-]S\d+[\.\-]?((?:-?E\d+)+)?([\.\-])/i
 
       result.match = (name.match(regex) ? 'tvshow' : 'movie')
       result.waste = name.replace(regex, '$2')
